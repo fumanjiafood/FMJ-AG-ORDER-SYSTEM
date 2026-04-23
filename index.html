@@ -86,14 +86,10 @@ const rawProducts = [
 
 // 熟肉类
 const cookedProducts = [
-  { name: "猪肉碎肉干 Pork Meat (Minced Meat)", price500: 44 },
-  { name: "猪肉碎肉干 Pork Meat (Minced Meat)", price1kg: 88 },
-  { name: "鸡肉碎肉干 Chicken Meat (Minced Meat)", price500: 44 },
-  { name: "鸡肉碎肉干 Chicken Meat (Minced Meat)", price1kg: 88 },
-  { name: "切片肉干 BBQ Sliced Pork Meat", price500: 59 },
-  { name: "切片肉干 BBQ Sliced Pork Meat", price1kg: 118 },
-  { name: "帝王肉干 Signature BBQ Bacon", price500: 84 },
-  { name: "帝王肉干 Signature BBQ Bacon",price1kg: 168 },
+  { name: "猪肉碎肉干 Pork Meat (Minced Meat)", price500: 44 , price1kg: 88 },
+  { name: "鸡肉碎肉干 Chicken Meat (Minced Meat)", price500: 44, price1kg: 88 },
+  { name: "切片肉干 BBQ Sliced Pork Meat", price500: 59, price1kg: 118 },
+  { name: "帝王肉干 Signature BBQ Bacon", price500: 84, price1kg: 168 },
   { name: "精品肉松 Pork Floss", price: 26, unit: "200G/Tin", isFixed: true },
   { name: "黄金辣味虾米卷 Spicy Spring Roll", price: 18, unit: "220G/Tin", isFixed: true },
   { name: "炭烧鸡蛋饼 Traditional Kuih Kapit", price: 26, unit: "340G/Tin", isFixed: true },
@@ -130,25 +126,52 @@ function renderCookedProducts() {
   let html = "";
   cookedProducts.forEach((p, i) => {
     if (p.isFixed) {
+      // 固定包装的商品（肉松、虾米卷等）
       html += `<div class="product">
           <span class="product-name">${p.name}</span>
           <span class="product-price">RM${p.price} / ${p.unit}</span>
-          <span class="product-qty"><input type="number" id="cooked_${i}" value="0" min="0" onchange="calc()" step="1"></span>
+          <span class="product-qty">
+            <input type="number" id="cooked_${i}" value="0" min="0" onchange="calc()" step="1" style="width:80px;">
+          </span>
       </div>`;
     } else {
-      html += `<div class="product">
-          <span class="product-name">${p.name}</span>
-          <span class="product-price">500G: RM${p.price500} | 1KG: RM${p.price1kg}</span>
-          <span class="product-qty">
-            500G: <input type="number" id="cooked_${i}_500" value="0" min="0" onchange="calc()" style="width:60px;">
-            1KG: <input type="number" id="cooked_${i}_1kg" value="0" min="0" onchange="calc()" style="width:60px;">
-          </span>
+      // 有 500G 和 1KG 选项的商品 - 上下按钮布局
+      html += `<div class="product" style="flex-direction:column; align-items:flex-start;">
+          <div style="width:100%; margin-bottom:8px;">
+            <span class="product-name">${p.name}</span>
+            <span class="product-price" style="float:right;">500G: RM${p.price500} | 1KG: RM${p.price1kg}</span>
+          </div>
+          <div style="display:flex; gap:20px; width:100%;">
+            <div style="display:flex; align-items:center; gap:8px; background:#f0f0f0; padding:5px 10px; border-radius:8px;">
+              <span style="font-weight:bold; min-width:45px;">500G</span>
+              <button type="button" onclick="changeQty('cooked_${i}_500', -1)" style="width:30px; background:#ddd; color:#333; margin:0;">-</button>
+              <input type="number" id="cooked_${i}_500" value="0" min="0" onchange="calc()" style="width:60px; text-align:center; margin:0;">
+              <button type="button" onclick="changeQty('cooked_${i}_500', 1)" style="width:30px; background:#ddd; color:#333; margin:0;">+</button>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; background:#f0f0f0; padding:5px 10px; border-radius:8px;">
+              <span style="font-weight:bold; min-width:45px;">1KG</span>
+              <button type="button" onclick="changeQty('cooked_${i}_1kg', -1)" style="width:30px; background:#ddd; color:#333; margin:0;">-</button>
+              <input type="number" id="cooked_${i}_1kg" value="0" min="0" onchange="calc()" style="width:60px; text-align:center; margin:0;">
+              <button type="button" onclick="changeQty('cooked_${i}_1kg', 1)" style="width:30px; background:#ddd; color:#333; margin:0;">+</button>
+            </div>
+          </div>
       </div>`;
     }
   });
   document.getElementById("cookedProducts").innerHTML = html;
 }
 
+// 增加/减少数量的辅助函数
+function changeQty(elementId, delta) {
+  let input = document.getElementById(elementId);
+  if (input) {
+    let newVal = parseInt(input.value) || 0;
+    newVal += delta;
+    if (newVal < 0) newVal = 0;
+    input.value = newVal;
+    calc();  // 重新计算总价
+  }
+}
 // 渲染包装材料
 function renderPackagingProducts() {
   let html = "";
